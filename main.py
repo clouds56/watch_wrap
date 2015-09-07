@@ -19,11 +19,15 @@ def new_watch(args):
     def check():
         nonlocal out
         try:
-            new_out = subprocess.check_output(args, timeout=timeout)
-        except subprocess.TimeoutExpired:
-            new_out = "run %s timeout"%args
+            new_out = subprocess.check_output(args, timeout=timeout, stderr=subprocess.DEVNULL).decode()
+        except subprocess.TimeoutExpired as e:
+            new_out = "TimeoutExpired: %s\n"%e
+        except subprocess.CalledProcessError as e:
+            new_out = "CalledProcessError: %s\n"%e
+        except FileNotFoundError as e:
+            new_out = "FileNotFoundError: %s\n"%e
         if new_out != out:
-            print(new_out)
+            print(new_out, end="")
             out = new_out
             return True
         return False
